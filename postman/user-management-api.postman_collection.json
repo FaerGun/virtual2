@@ -1,0 +1,275 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890",
+		"name": "User Management API",
+		"description": "Коллекция для тестирования API управления пользователями",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Аутентификация",
+			"item": [
+				{
+					"name": "Создание пользователя",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\",\n    \"firstName\": \"Admin\",\n    \"lastName\": \"User\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["users"]
+						},
+						"description": "Создание нового пользователя"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Статус 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Есть токен\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"token\");",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Пользователи",
+			"item": [
+				{
+					"name": "Получение списка пользователей",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["users"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Получение списка пользователей (только для админов)"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Статус 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Есть список пользователей\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"users\");",
+									"    pm.expect(jsonData).to.have.property(\"totalPages\");",
+									"    pm.expect(jsonData).to.have.property(\"currentPage\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Получение пользователя по ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "user_id_here"
+								}
+							]
+						},
+						"description": "Получение информации о пользователе по ID"
+					}
+				},
+				{
+					"name": "Обновление пользователя",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Updated\",\n    \"lastName\": \"Name\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "user_id_here"
+								}
+							]
+						},
+						"description": "Обновление информации о пользователе"
+					}
+				},
+				{
+					"name": "Удаление пользователя",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "user_id_here"
+								}
+							]
+						},
+						"description": "Удаление пользователя"
+					}
+				},
+				{
+					"name": "Изменение статуса пользователя",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"blocked\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/:id/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", ":id", "status"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "user_id_here"
+								}
+							]
+						},
+						"description": "Изменение статуса пользователя"
+					}
+				},
+				{
+					"name": "Поиск пользователей",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/search?query=admin",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "search"],
+							"query": [
+								{
+									"key": "query",
+									"value": "admin"
+								}
+							]
+						},
+						"description": "Поиск пользователей по имени, email и т.д."
+					}
+				},
+				{
+					"name": "Получение информации о текущем пользователе",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "me"]
+						},
+						"description": "Получение информации о текущем пользователе"
+					}
+				}
+			]
+		}
+	]
+} 
